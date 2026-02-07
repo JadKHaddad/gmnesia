@@ -39,7 +39,7 @@ pub fn main()() {
 
   system.info()
 
-let assert Ok(_) =
+  let assert Ok(_) =
     transaction.new(fn() {
       write.new(Person("1", "Alice"))
       |> write.write
@@ -62,9 +62,23 @@ let assert Ok(_) =
     transaction.new(fn() { read.new(table, key: "1") |> read.read })
     |> transaction.execute
 
-  let assert Ok([Person("2", "Bob")]) =
+  // Now a `Bob` becomes a `Boba` :/
+  let assert Ok([Person("2", "Boba")]) =
     transaction.new(fn() {
-      read.new(table, key: "2") |> read.lock(lock.Write) |> read.read
+      case read.new(table, key: "2") |> read.lock(lock.Write) |> read.read {
+        [Person(id, _), ..] -> {
+          let boba = Person(id, "Boba")
+
+          write.new(boba)
+          |> write.table(table)
+          |> write.lock(write.Write)
+          |> write.write
+
+          read.new(table, key: "2") |> read.lock(lock.Read) |> read.read
+        }
+
+        [] -> []
+      }
     })
     |> transaction.execute
 
