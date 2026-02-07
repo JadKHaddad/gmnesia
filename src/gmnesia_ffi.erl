@@ -82,16 +82,13 @@ transaction(Fun, Retries) ->
     end.
 
 write(Table, Record, Lock) ->
-    mnesia:write(Table, Record, Lock),
-    nil.
+    mnesia:write(Table, Record, Lock).
 
 write(Record) ->
-    mnesia:write(Record),
-    nil.
+    mnesia:write(Record).
 
 delete(Table, Record, Lock) ->
-    mnesia:delete(Table, Record, Lock),
-    nil.
+    mnesia:delete(Table, Record, Lock).
 
 read(Tab, Key, Lock) ->
     mnesia:read(Tab, Key, Lock).
