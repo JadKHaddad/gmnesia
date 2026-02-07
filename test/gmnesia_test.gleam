@@ -1,9 +1,12 @@
 import gleam/erlang/atom
 import gleam/erlang/node
+import gleam/erlang/process
+import gleam/io
 import gleeunit
 import gmnesia/lock
 import gmnesia/read
 import gmnesia/schema
+import gmnesia/subscribe
 import gmnesia/system
 import gmnesia/table
 import gmnesia/transaction
@@ -15,6 +18,18 @@ pub fn main() -> Nil {
 
 pub type Person {
   Person(id: String, name: String)
+}
+
+pub fn listen() {
+  let subject = process.new_subject()
+
+  case process.receive(subject, 1000) {
+    Ok(message) -> {
+      io.println("Received message: " <> message)
+      listen()
+    }
+    Error(_) -> io.println("No message received")
+  }
 }
 
 pub fn raw_ffi_test() {
@@ -34,6 +49,11 @@ pub fn raw_ffi_test() {
       ),
       table.Type(table.Set),
     ])
+
+  system.info()
+
+  let assert Ok(_) =
+    subscribe.subscribe(subscribe.Table(table, subscribe.Simple))
 
   system.info()
 
@@ -65,6 +85,8 @@ pub fn raw_ffi_test() {
   let assert Ok(_) = system.stop()
 
   let assert Ok(_) = schema.delete_schema(nodes: [node.name(node.self())])
+
+  listen()
 }
 
 pub fn api_test() {

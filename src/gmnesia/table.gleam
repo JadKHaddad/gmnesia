@@ -6,7 +6,7 @@ pub type Table =
 
 /// <https://www.erlang.org/doc/apps/mnesia/mnesia.html#create_table/2>
 /// 
-pub type CreateOptions {
+pub type Options {
   // TODO: More options
   Attributes(List(atom.Atom))
   Type(Type)
@@ -25,7 +25,7 @@ pub type Type {
 @external(erlang, "gmnesia_ffi", "create_table")
 pub fn create_table(
   table table: Table,
-  options options: List(CreateOptions),
+  options options: List(Options),
 ) -> Result(Nil, Dynamic)
 
 /// <https://www.erlang.org/doc/apps/mnesia/mnesia.html#delete_table/1>
