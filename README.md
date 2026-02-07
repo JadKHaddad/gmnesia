@@ -1,0 +1,77 @@
+# gmnesia
+
+An experimental, opinionated wrapper around the Erlang [Mnesia](https://www.erlang.org/doc/apps/mnesia/mnesia.html) database for functions ``I`` use.
+
+## Usage
+
+```gleam
+import gleam/erlang/atom
+import gleam/erlang/node
+import gleeunit
+import gmnesia/lock
+import gmnesia/read
+import gmnesia/schema
+import gmnesia/system
+import gmnesia/table
+import gmnesia/transaction
+import gmnesia/write
+
+pub type Person {
+  Person(id: String, name: String)
+}
+
+pub fn main()() {
+  let assert Ok(_) = system.stop()
+
+  let _ = schema.create_schema(nodes: [node.name(node.self())])
+
+  let assert Ok(_) = system.start()
+
+  let table = atom.create("person")
+
+  let assert Ok(_) =
+    table.create_table(table, [
+      table.Attributes(
+        [atom.create("id"), atom.create("name")],
+      ),
+      table.Type(table.Set),
+    ])
+
+  system.info()
+
+  let assert Ok(_) =
+    transaction.transaction_1(fn() {
+      write.write_1(record: Person("1", "Alice"))
+    })
+
+  let assert Ok(_) =
+    transaction.transaction_1(fn() {
+      write.write_3(table, record: Person("1", "Alice"), lock: write.Write)
+    })
+
+  let read = fn() -> List(Person) {
+    read.read_3(table, key: "1", lock: lock.Read)
+  }
+
+  let assert Ok([Person("1", "Alice")]) = transaction.transaction_1(read)
+
+  let assert Ok(_) =
+    transaction.transaction_1(fn() {
+      write.delete_3(table, key: "1", lock: write.Write)
+    })
+
+  let assert Ok([]) = transaction.transaction_1(read)
+
+  let assert Ok(_) = table.delete_table(table)
+
+  let assert Ok(_) = system.stop()
+
+  let assert Ok(_) = schema.delete_schema(nodes: [node.name(node.self())])
+}
+```
+
+## Development
+
+```sh
+gleam test  # Run the tests
+```
