@@ -1,8 +1,8 @@
 -module(gmnesia_ffi).
 
 -export([info/0, system_info/1, start/0, stop/0, create_schema/1, delete_schema/1,
-         create_table/2, delete_table/1, transaction_1/1, write_3/3, write_1/1, delete_3/3,
-         read_3/3]).
+         create_table/2, delete_table/1, transaction/1, transaction/2, write/3, write/1, delete/3,
+         read/3]).
 
 info() ->
     mnesia:info().
@@ -58,7 +58,7 @@ delete_table(Table) ->
             {error, Reason}
     end.
 
-transaction_1(Fun) ->
+transaction(Fun) ->
     case mnesia:transaction(Fun) of
         {atomic, Result} ->
             {ok, Result};
@@ -66,17 +66,32 @@ transaction_1(Fun) ->
             {error, Reason}
     end.
 
-write_3(Table, Record, Lock) ->
+transaction(Fun, Retries) ->
+    RetriesOpt =
+        case Retries of
+            infinity ->
+                infinity;
+            {finite, N} ->
+                N
+        end,
+    case mnesia:transaction(Fun, RetriesOpt) of
+        {atomic, Result} ->
+            {ok, Result};
+        {aborted, Reason} ->
+            {error, Reason}
+    end.
+
+write(Table, Record, Lock) ->
     mnesia:write(Table, Record, Lock),
     nil.
 
-write_1(Record) ->
+write(Record) ->
     mnesia:write(Record),
     nil.
 
-delete_3(Table, Record, Lock) ->
+delete(Table, Record, Lock) ->
     mnesia:delete(Table, Record, Lock),
     nil.
 
-read_3(Tab, Key, Lock) ->
+read(Tab, Key, Lock) ->
     mnesia:read(Tab, Key, Lock).

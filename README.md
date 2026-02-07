@@ -39,28 +39,34 @@ pub fn main()() {
 
   system.info()
 
-  let assert Ok(_) =
-    transaction.transaction_1(fn() {
-      write.write_1(record: Person("1", "Alice"))
+let assert Ok(_) =
+    transaction.new(fn() {
+      write.new(Person("1", "Alice"))
+      |> write.write
     })
-
-  let assert Ok(_) =
-    transaction.transaction_1(fn() {
-      write.write_3(table, record: Person("1", "Alice"), lock: write.Write)
-    })
-
-  let read = fn() -> List(Person) {
-    read.read_3(table, key: "1", lock: lock.Read)
-  }
-
-  let assert Ok([Person("1", "Alice")]) = transaction.transaction_1(read)
+    |> transaction.execute
 
   let assert Ok(_) =
-    transaction.transaction_1(fn() {
-      write.delete_3(table, key: "1", lock: write.Write)
+    transaction.new(fn() {
+      write.new(Person("2", "Bob"))
+      |> write.lock(write.StickyWrite)
+      // Adding the table is optional, it will be inferred from the value
+      // e.g. from the Person type it will be inferred as "person"
+      |> write.table(table)
+      |> write.write
     })
+    |> transaction.retries(transaction.Finite(3))
+    |> transaction.execute
 
-  let assert Ok([]) = transaction.transaction_1(read)
+  let assert Ok([Person("1", "Alice")]) =
+    transaction.new(fn() { read.new(table, key: "1") |> read.read })
+    |> transaction.execute
+
+  let assert Ok([Person("2", "Bob")]) =
+    transaction.new(fn() {
+      read.new(table, key: "2") |> read.lock(lock.Write) |> read.read
+    })
+    |> transaction.execute
 
   let assert Ok(_) = table.delete_table(table)
 
