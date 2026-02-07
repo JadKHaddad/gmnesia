@@ -1,7 +1,7 @@
 -module(gmnesia_ffi).
 
 -export([info/0, system_info/1, start/0, stop/0, create_schema/1, delete_schema/1,
-         create_table/2, delete_table/1, transaction/1, transaction/2, write/3, write/1, delete/3,
+         create_table/2,  delete_table/1, wait_for_tables/2, transaction/1, transaction/2, write/3, write/1, delete/3,
          read/3, subscribe/1]).
 
 info() ->
@@ -48,6 +48,23 @@ create_table(Table, Options) ->
             {ok, nil};
         {aborted, Reason} ->
             {error, Reason}
+    end.
+
+wait_for_tables(Tabs, Timeout) ->
+    TimeoutOpt =
+        case Timeout of
+            infinity ->
+                infinity;
+            {finite, N} ->
+                N
+        end,
+    case mnesia:wait_for_tables(Tabs, TimeoutOpt) of
+        ok ->
+            {ok, nil};
+        {error, Reason} ->
+            {error, Reason};
+        {timeout, Tables} ->
+            {timeout, Tables}
     end.
 
 delete_table(Table) ->

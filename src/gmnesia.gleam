@@ -1,73 +1,33 @@
 import gleam/erlang/atom
 import gleam/erlang/node
-import gleeunit
+import gleam/erlang/process
+import gleam/io
+import gleam/string
 import gmnesia/lock
 import gmnesia/read
 import gmnesia/schema
+import gmnesia/subscribe
 import gmnesia/system
 import gmnesia/table
 import gmnesia/transaction
 import gmnesia/write
 
-pub fn main() -> Nil {
-  gleeunit.main()
-}
-
 pub type Person {
   Person(id: String, name: String)
 }
 
-pub fn raw_ffi_test() {
-  let assert Ok(_) = system.stop()
-
-  let _ = schema.create_schema(nodes: [node.name(node.self())])
-
-  let assert Ok(_) = system.start()
-
-  let table = atom.create("person")
-
-  let _ =
-    table.create_table(table, [
-      table.Attributes(
-        // TODO: can we get the atoms of the Person struct? like erlang's record_info(fields, Person)
-        [atom.create("id"), atom.create("name")],
-      ),
-      table.Type(table.Set),
-    ])
-
-  system.info()
-
-  let assert Ok(_) =
-    transaction.transaction_1(fn() {
-      write.write_1(value: Person("1", "Alice"))
+pub fn listen() {
+  let selector = process.new_selector()
+  let selector =
+    process.select_other(selector, fn(msg) {
+      io.println("Received Mnesia message: " <> string.inspect(msg))
     })
+  process.selector_receive_forever(selector)
 
-  let assert Ok(_) =
-    transaction.transaction_1(fn() {
-      write.write_3(table, value: Person("1", "Alice"), lock: write.Write)
-    })
-
-  let read = fn() -> List(Person) {
-    read.read_3(table, key: "1", lock: lock.Read)
-  }
-
-  let assert Ok([Person("1", "Alice")]) = transaction.transaction_1(read)
-
-  let assert Ok(_) =
-    transaction.transaction_1(fn() {
-      write.delete_3(table, key: "1", lock: write.Write)
-    })
-
-  let assert Ok([]) = transaction.transaction_1(read)
-
-  let assert Ok(_) = table.delete_table(table)
-
-  let assert Ok(_) = system.stop()
-
-  let assert Ok(_) = schema.delete_schema(nodes: [node.name(node.self())])
+  listen()
 }
 
-pub fn api_test() {
+pub fn main() {
   let assert Ok(_) = system.stop()
 
   let _ = schema.create_schema(nodes: [node.name(node.self())])
@@ -81,6 +41,17 @@ pub fn api_test() {
       table.Attributes([atom.create("id"), atom.create("name")]),
       table.Type(table.Set),
     ])
+
+  let assert Ok(_) = table.wait_for_tables([table], table.Finite(1000))
+
+  process.spawn(fn() {
+    let assert Ok(_) =
+      subscribe.subscribe(subscribe.Table(
+        atom.create("person"),
+        subscribe.Simple,
+      ))
+    listen()
+  })
 
   let assert Ok(_) =
     transaction.new(fn() {
@@ -123,4 +94,6 @@ pub fn api_test() {
       }
     })
     |> transaction.execute
+
+  process.sleep_forever()
 }

@@ -4,6 +4,16 @@ import gleam/erlang/atom
 pub type Table =
   atom.Atom
 
+pub type Timeout {
+  Infinity
+  Finite(Int)
+}
+
+pub type WaitError {
+  Error(Dynamic)
+  Timeout(List(Table))
+}
+
 /// <https://www.erlang.org/doc/apps/mnesia/mnesia.html#create_table/2>
 /// 
 pub type Options {
@@ -32,3 +42,11 @@ pub fn create_table(
 /// 
 @external(erlang, "gmnesia_ffi", "delete_table")
 pub fn delete_table(table table: Table) -> Result(Nil, Dynamic)
+
+/// <https://www.erlang.org/doc/apps/mnesia/mnesia.html#wait_for_tables/2>
+///
+@external(erlang, "gmnesia_ffi", "wait_for_tables")
+pub fn wait_for_tables(
+  tables tables: List(Table),
+  timeout timeout: Timeout,
+) -> Result(Nil, WaitError)
