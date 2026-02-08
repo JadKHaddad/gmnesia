@@ -1,3 +1,4 @@
+import gleam/dynamic
 import gleam/erlang/atom
 import gleam/erlang/node
 import gleeunit
@@ -158,6 +159,22 @@ pub fn api_test() {
     }
     |> transaction.new
     |> transaction.execute
+
+  let reason = dynamic.string("Aborting transaction")
+
+  let assert Error(error) =
+    fn() {
+      Person("3", "Abort")
+      |> write.new
+      |> write.write
+
+      reason
+      |> transaction.abort
+    }
+    |> transaction.new
+    |> transaction.execute
+
+  assert error == reason
 
   let assert Ok(_) = table |> table_delete.new |> table_delete.delete
 

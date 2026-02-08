@@ -5,6 +5,11 @@ pub type Retries {
   Finite(Int)
 }
 
+/// <https://www.erlang.org/doc/apps/mnesia/mnesia.html#abort/1>
+/// 
+@external(erlang, "gmnesia_ffi", "abort")
+pub fn abort(reason reason: Dynamic) -> Nil
+
 /// <https://www.erlang.org/doc/apps/mnesia/mnesia.html#transaction/1>
 /// 
 @external(erlang, "gmnesia_ffi", "transaction")
