@@ -1,6 +1,7 @@
 import gleam/erlang/atom
 import gleam/erlang/node
 import gleeunit
+import gmnesia/delete
 import gmnesia/lock
 import gmnesia/read
 import gmnesia/schema
@@ -55,7 +56,7 @@ pub fn raw_ffi_test() {
 
   let assert Ok(_) =
     transaction.transaction_1(fn() {
-      write.delete_3(table, key: "1", lock: write.Write)
+      delete.delete_3(table, key: "1", lock: write.Write)
     })
 
   let assert Ok([]) = transaction.transaction_1(read)
@@ -77,50 +78,70 @@ pub fn api_test() {
   let table = atom.create("person")
 
   let _ =
-    table.create_table(table, [
+    table
+    |> table.create_table([
       table.Attributes([atom.create("id"), atom.create("name")]),
       table.Type(table.Set),
     ])
 
   let assert Ok(_) =
-    transaction.new(fn() {
-      write.new(Person("1", "Alice"))
+    fn() {
+      Person("1", "Alice")
+      |> write.new
       |> write.write
-    })
+    }
+    |> transaction.new
     |> transaction.execute
 
   let assert Ok(_) =
-    transaction.new(fn() {
-      write.new(Person("2", "Bob"))
+    fn() {
+      Person("2", "Bob")
+      |> write.new
       |> write.lock(write.StickyWrite)
       // Adding the table is optional, it will be inferred from the value
       // e.g. from the Person type it will be inferred as "person"
       |> write.table(table)
       |> write.write
-    })
+    }
+    |> transaction.new
     |> transaction.retries(transaction.Finite(3))
     |> transaction.execute
 
   let assert Ok([Person("1", "Alice")]) =
-    transaction.new(fn() { read.new(table, key: "1") |> read.read })
+    fn() { table |> read.new(key: "1") |> read.read }
+    |> transaction.new
     |> transaction.execute
 
   let assert Ok([Person("2", "Boba")]) =
-    transaction.new(fn() {
-      case read.new(table, key: "2") |> read.lock(lock.Write) |> read.read {
+    fn() {
+      case table |> read.new(key: "2") |> read.lock(lock.Write) |> read.read {
         [Person(id, _), ..] -> {
-          let boba = Person(id, "Boba")
-
-          write.new(boba)
+          Person(id, "Boba")
+          |> write.new
           |> write.table(table)
           |> write.lock(write.Write)
           |> write.write
 
-          read.new(table, key: "2") |> read.lock(lock.Read) |> read.read
+          table |> read.new(key: "2") |> read.lock(lock.Read) |> read.read
         }
 
         [] -> []
       }
-    })
+    }
+    |> transaction.new
+    |> transaction.execute
+
+  let assert Ok([]) =
+    fn() {
+      table
+      |> delete.new(key: "1")
+      |> delete.lock(write.Write)
+      |> delete.delete
+
+      table
+      |> read.new(key: "1")
+      |> read.read
+    }
+    |> transaction.new
     |> transaction.execute
 }

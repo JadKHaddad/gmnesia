@@ -18,11 +18,6 @@ pub fn write_3(table table: Table, value value: a, lock lock: WriteLock) -> Nil
 @external(erlang, "gmnesia_ffi", "write")
 pub fn write_1(value value: a) -> Nil
 
-/// <https://www.erlang.org/doc/apps/mnesia/mnesia.html#delete/3>
-/// 
-@external(erlang, "gmnesia_ffi", "delete")
-pub fn delete_3(table table: Table, key key: a, lock lock: WriteLock) -> Nil
-
 pub opaque type Builder(a) {
   Builder(table: Option(Table), value: a, lock: WriteLock)
 }
