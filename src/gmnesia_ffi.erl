@@ -1,6 +1,6 @@
 -module(gmnesia_ffi).
 
--export([info/0, system_info/1, start/0, stop/0, create_schema/1, delete_schema/1, all_keys/1,
+-export([info/0, system_info/1, start/0, stop/0, create_schema/1, delete_schema/1, all_keys/1, first/1, last/1,
          create_table/2,  delete_table/1, wait_for_tables/2, transaction/1, transaction/2, abort/1, write/3, write/1, delete/3,
          read/3, subscribe/1, unsubscribe/1]).
 
@@ -44,6 +44,12 @@ delete_schema(Nodes) ->
 
 all_keys(Table) ->
     mnesia:all_keys(Table).
+
+first(Table) ->
+    mnesia:first(Table).
+
+last(Table) ->
+    mnesia:last(Table).
 
 create_table(Table, Options) ->
     case mnesia:create_table(Table, Options) of

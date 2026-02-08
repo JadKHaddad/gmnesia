@@ -1,9 +1,6 @@
 import gleam/dynamic
 import gleam/erlang/atom
 import gleam/erlang/node
-import gleam/io
-import gleam/list
-import gleam/string
 import gleeunit
 import gmnesia/delete
 import gmnesia/lock
@@ -46,12 +43,6 @@ pub fn raw_ffi_test() {
   let assert Ok(_) =
     table.wait_for_tables(tables: [table], timeout: table.Finite(5000))
 
-  // TODO: the keys are defined as Dynamic, but mnesia returns a list of ::term()
-  let assert Ok(keys) =
-    transaction.transaction_1(fn() { table.all_keys(table) })
-
-  io.println("Keys in the table: " <> string.inspect(keys))
-
   system.info()
 
   let assert Ok(_) =
@@ -68,6 +59,11 @@ pub fn raw_ffi_test() {
     read.read_3(table, key: "1", lock: lock.Read)
   }
 
+  let assert Ok(keys) =
+    transaction.transaction_1(fn() { table.all_keys(table) })
+
+  assert keys == [dynamic.string("1")]
+
   let assert Ok([Person("1", "Alice")]) = transaction.transaction_1(read)
 
   let assert Ok(_) =
@@ -82,6 +78,41 @@ pub fn raw_ffi_test() {
   let assert Ok(_) = system.stop()
 
   let assert Ok(_) = schema.delete_schema(nodes: [node.name(node.self())])
+}
+
+pub fn first_last_test() {
+  let assert Ok(_) = system.stop()
+
+  let _ = schema.create_schema(nodes: [node.name(node.self())])
+
+  let assert Ok(_) = system.start()
+
+  let table = atom.create("person")
+
+  let _ =
+    table.create_table(table, [
+      table.Attributes([atom.create("id"), atom.create("name")]),
+      table.Type(table.OrderedSet),
+    ])
+
+  let assert Ok(_) =
+    table.wait_for_tables(tables: [table], timeout: table.Finite(5000))
+
+  let assert Ok(_) =
+    transaction.transaction_1(fn() {
+      write.write_1(value: Person("1", "Alice"))
+      write.write_1(value: Person("2", "Bob"))
+    })
+
+  let assert Ok(#(first, last)) =
+    transaction.transaction_1(fn() {
+      let first = table.first(table)
+      let last = table.last(table)
+
+      #(first, last)
+    })
+
+  assert #(first, last) == #(dynamic.string("1"), dynamic.string("2"))
 }
 
 pub fn api_test() {

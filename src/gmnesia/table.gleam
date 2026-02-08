@@ -55,3 +55,15 @@ pub fn wait_for_tables(
 /// 
 @external(erlang, "gmnesia_ffi", "all_keys")
 pub fn all_keys(table table: Table) -> List(Dynamic)
+
+/// <https://www.erlang.org/doc/apps/mnesia/mnesia.html#first/1>
+/// 
+/// The table must be an ordered set for this function to make sense.
+@external(erlang, "gmnesia_ffi", "first")
+pub fn first(table table: Table) -> Dynamic
+
+/// <https://www.erlang.org/doc/apps/mnesia/mnesia.html#last/1>
+/// 
+/// The table must be an ordered set for this function to make sense.
+@external(erlang, "gmnesia_ffi", "last")
+pub fn last(table table: Table) -> Dynamic
