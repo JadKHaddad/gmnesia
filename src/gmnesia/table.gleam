@@ -50,3 +50,8 @@ pub fn wait_for_tables(
   tables tables: List(Table),
   timeout timeout: Timeout,
 ) -> Result(Nil, WaitError)
+
+/// <https://www.erlang.org/doc/apps/mnesia/mnesia.html#all_keys/1>
+/// 
+@external(erlang, "gmnesia_ffi", "all_keys")
+pub fn all_keys(table table: Table) -> List(Dynamic)

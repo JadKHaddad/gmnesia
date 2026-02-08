@@ -1,6 +1,9 @@
 import gleam/dynamic
 import gleam/erlang/atom
 import gleam/erlang/node
+import gleam/io
+import gleam/list
+import gleam/string
 import gleeunit
 import gmnesia/delete
 import gmnesia/lock
@@ -42,6 +45,12 @@ pub fn raw_ffi_test() {
 
   let assert Ok(_) =
     table.wait_for_tables(tables: [table], timeout: table.Finite(5000))
+
+  // TODO: the keys are defined as Dynamic, but mnesia returns a list of ::term()
+  let assert Ok(keys) =
+    transaction.transaction_1(fn() { table.all_keys(table) })
+
+  io.println("Keys in the table: " <> string.inspect(keys))
 
   system.info()
 
