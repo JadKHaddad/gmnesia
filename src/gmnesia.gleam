@@ -17,12 +17,11 @@ pub type Person {
 }
 
 pub fn listen() {
-  let selector = process.new_selector()
-  let selector =
-    process.select_other(selector, fn(msg) {
-      io.println("Received Mnesia message: " <> string.inspect(msg))
-    })
-  process.selector_receive_forever(selector)
+  process.new_selector()
+  |> process.select_other(fn(msg) {
+    io.println("Received Mnesia message: " <> string.inspect(msg))
+  })
+  |> process.selector_receive_forever
 
   listen()
 }
@@ -45,11 +44,12 @@ pub fn main() {
   let assert Ok(_) = table.wait_for_tables([table], table.Finite(1000))
 
   process.spawn(fn() {
-    let assert Ok(_) =
+    let _ =
       subscribe.subscribe(subscribe.Table(
         atom.create("person"),
         subscribe.Simple,
       ))
+
     listen()
   })
 

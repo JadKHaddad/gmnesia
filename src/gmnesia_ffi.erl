@@ -2,7 +2,7 @@
 
 -export([info/0, system_info/1, start/0, stop/0, create_schema/1, delete_schema/1,
          create_table/2,  delete_table/1, wait_for_tables/2, transaction/1, transaction/2, write/3, write/1, delete/3,
-         read/3, subscribe/1]).
+         read/3, subscribe/1, unsubscribe/1]).
 
 info() ->
     mnesia:info().
@@ -112,6 +112,14 @@ read(Tab, Key, Lock) ->
 
 subscribe(What) ->
     case mnesia:subscribe(What) of
+        {ok, Node} ->
+            {ok, Node};
+        {error, Reason} ->
+            {error, Reason}
+    end.
+
+unsubscribe(What) ->
+    case mnesia:unsubscribe(What) of
         {ok, Node} ->
             {ok, Node};
         {error, Reason} ->
