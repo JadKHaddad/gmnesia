@@ -10,3 +10,21 @@ pub fn create_schema(nodes nodes: List(Node)) -> Result(Nil, Dynamic)
 /// 
 @external(erlang, "gmnesia_ffi", "delete_schema")
 pub fn delete_schema(nodes nodes: List(Node)) -> Result(Nil, Dynamic)
+
+pub opaque type Builder {
+  Builder(nodes: List(Node))
+}
+
+pub fn new(nodes nodes: List(Node)) -> Builder {
+  Builder(nodes: nodes)
+}
+
+pub fn create(builder: Builder) -> Result(Nil, Dynamic) {
+  let Builder(nodes) = builder
+  create_schema(nodes)
+}
+
+pub fn delete(builder: Builder) -> Result(Nil, Dynamic) {
+  let Builder(nodes) = builder
+  delete_schema(nodes)
+}

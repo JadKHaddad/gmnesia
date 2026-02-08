@@ -7,6 +7,9 @@ import gmnesia/read
 import gmnesia/schema
 import gmnesia/system
 import gmnesia/table
+import gmnesia/table/create as table_create
+import gmnesia/table/delete as table_delete
+import gmnesia/table/wait
 import gmnesia/transaction
 import gmnesia/write
 
@@ -35,6 +38,9 @@ pub fn raw_ffi_test() {
       ),
       table.Type(table.Set),
     ])
+
+  let assert Ok(_) =
+    table.wait_for_tables(tables: [table], timeout: table.Finite(5000))
 
   system.info()
 
@@ -71,7 +77,7 @@ pub fn raw_ffi_test() {
 pub fn api_test() {
   let assert Ok(_) = system.stop()
 
-  let _ = schema.create_schema(nodes: [node.name(node.self())])
+  let _ = [node.name(node.self())] |> schema.new |> schema.create
 
   let assert Ok(_) = system.start()
 
@@ -79,10 +85,18 @@ pub fn api_test() {
 
   let _ =
     table
-    |> table.create_table([
+    |> table_create.new
+    |> table_create.options([
       table.Attributes([atom.create("id"), atom.create("name")]),
       table.Type(table.Set),
     ])
+    |> table_create.create
+
+  let assert Ok(_) =
+    [table]
+    |> wait.new
+    |> wait.timeout(table.Finite(5000))
+    |> wait.wait
 
   let assert Ok(_) =
     fn() {
@@ -144,4 +158,10 @@ pub fn api_test() {
     }
     |> transaction.new
     |> transaction.execute
+
+  let assert Ok(_) = table |> table_delete.new |> table_delete.delete
+
+  let assert Ok(_) = system.stop()
+
+  let _ = [node.name(node.self())] |> schema.new |> schema.delete
 }

@@ -4,16 +4,6 @@ import gleam/erlang/atom
 pub type Table =
   atom.Atom
 
-pub type Timeout {
-  Infinity
-  Finite(Int)
-}
-
-pub type WaitError {
-  Error(Dynamic)
-  Timeout(List(Table))
-}
-
 /// <https://www.erlang.org/doc/apps/mnesia/mnesia.html#create_table/2>
 /// 
 pub type Options {
@@ -28,6 +18,16 @@ pub type Type {
   Set
   OrderedSet
   Bag
+}
+
+pub type Timeout {
+  Infinity
+  Finite(Int)
+}
+
+pub type WaitError {
+  Error(Dynamic)
+  Timeout(List(Table))
 }
 
 /// <https://www.erlang.org/doc/apps/mnesia/mnesia.html#create_table/2>
