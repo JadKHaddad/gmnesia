@@ -38,6 +38,7 @@ pub fn raw_ffi_test() {
         [atom.create("id"), atom.create("name")],
       ),
       table.Type(table.Set),
+      table.DiscCopies([node.name(node.self())]),
     ])
 
   let assert Ok(_) =
@@ -130,6 +131,7 @@ pub fn api_test() {
     |> table_create.options([
       table.Attributes([atom.create("id"), atom.create("name")]),
       table.Type(table.Set),
+      table.DiscOnlyCopies([node.name(node.self())]),
     ])
     |> table_create.create
 

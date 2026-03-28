@@ -1,5 +1,6 @@
 import gleam/dynamic.{type Dynamic}
 import gleam/erlang/atom
+import gmnesia/node.{type Node}
 
 pub type Table =
   atom.Atom
@@ -10,6 +11,8 @@ pub type Options {
   // TODO: More options
   Attributes(List(atom.Atom))
   Type(Type)
+  DiscCopies(List(Node))
+  DiscOnlyCopies(List(Node))
 }
 
 /// <https://www.erlang.org/doc/apps/mnesia/mnesia.html#create_table/2>
