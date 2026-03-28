@@ -2,6 +2,7 @@ import gleam/dynamic
 import gleam/erlang/atom
 import gleam/erlang/node
 import gleeunit
+import gmnesia/debug
 import gmnesia/delete
 import gmnesia/lock
 import gmnesia/read
@@ -23,6 +24,8 @@ pub type Person {
 }
 
 pub fn raw_ffi_test() {
+  debug.set_debug_level(debug.Verbose)
+
   let assert Ok(_) = system.stop()
 
   let _ = schema.create_schema(nodes: [node.name(node.self())])
