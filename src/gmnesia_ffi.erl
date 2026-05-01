@@ -1,8 +1,8 @@
 -module(gmnesia_ffi).
 
--export([info/0, system_info/1, start/0, stop/0, create_schema/1, delete_schema/1, all_keys/1, first/1, last/1,
+-export([info/0, system_info/1, start/0, stop/0, create_schema/1, delete_schema/1, all_keys/1, first/1, last/1, add_table_copy/3, change_table_copy_type/3,
          create_table/2,  delete_table/1, wait_for_tables/2, transaction/1, transaction/2, abort/1, write/3, write/1, delete/3,
-         read/3, subscribe/1, unsubscribe/1, set_debug_level/1]).
+         read/3, subscribe/1, unsubscribe/1, set_debug_level/1, change_config/2]).
 
 info() ->
     mnesia:info().
@@ -50,6 +50,23 @@ first(Table) ->
 
 last(Table) ->
     mnesia:last(Table).
+
+add_table_copy(Table, Node, StorageType) ->
+    case mnesia:add_table_copy(Table, Node, StorageType) of
+        {atomic, ok} ->
+            {ok, nil};
+        {aborted, Reason} ->
+            {error, Reason}
+    end.
+
+change_table_copy_type(Table, Node, StorageType) ->
+    case mnesia:change_table_copy_type(Table, Node, StorageType) of
+        {atomic, ok} ->
+            {ok, nil};
+        {aborted, Reason} ->
+            {error, Reason}
+    end.
+
 
 create_table(Table, Options) ->
     case mnesia:create_table(Table, Options) of
@@ -140,3 +157,11 @@ unsubscribe(What) ->
 
 set_debug_level(Level) ->
     mnesia:set_debug_level(Level).
+
+change_config(Key, Value) ->
+    case mnesia:change_config(Key, Value) of
+        {ok, Ok} ->
+            {ok, Ok};
+        {error, Reason} ->
+            {error, Reason}
+    end.

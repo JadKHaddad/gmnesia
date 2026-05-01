@@ -1,9 +1,18 @@
 import gleam/dynamic.{type Dynamic}
 import gleam/erlang/atom
 import gmnesia/node.{type Node}
+import gmnesia/storage.{type StorageType}
 
 pub type Table =
   atom.Atom
+
+/// <https://www.erlang.org/doc/apps/mnesia/mnesia.html#table_info/2>
+/// 
+pub type TableInfo {
+  All
+  AccessModule
+  // TODO: More info types
+}
 
 /// <https://www.erlang.org/doc/apps/mnesia/mnesia.html#create_table/2>
 /// 
@@ -70,3 +79,19 @@ pub fn first(table table: Table) -> Dynamic
 /// The table must be an ordered set for this function to make sense.
 @external(erlang, "gmnesia_ffi", "last")
 pub fn last(table table: Table) -> Dynamic
+
+/// <https://www.erlang.org/doc/apps/mnesia/mnesia.html#add_table_copy/3>
+@external(erlang, "gmnesia_ffi", "add_table_copy")
+pub fn add_table_copy(
+  table table: Table,
+  node node: Node,
+  storage_type storage_type: StorageType,
+) -> Result(Nil, Dynamic)
+
+/// <https://www.erlang.org/doc/apps/mnesia/mnesia.html#change_table_copy_type/3>
+@external(erlang, "gmnesia_ffi", "change_table_copy_type")
+pub fn change_table_copy_type(
+  table table: Table,
+  node node: Node,
+  storage_type storage_type: StorageType,
+) -> Result(Nil, Dynamic)

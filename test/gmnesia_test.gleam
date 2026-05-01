@@ -2,6 +2,7 @@ import gleam/dynamic
 import gleam/erlang/atom
 import gleam/erlang/node
 import gleeunit
+import gmnesia/config
 import gmnesia/debug
 import gmnesia/delete
 import gmnesia/lock
@@ -117,6 +118,21 @@ pub fn first_last_test() {
     })
 
   assert #(first, last) == #(dynamic.string("1"), dynamic.string("2"))
+}
+
+pub fn change_config_extra_db_nodes_test() {
+  debug.set_debug_level(debug.Verbose)
+
+  let assert Ok(_) = system.stop()
+
+  let _ = schema.create_schema(nodes: [node.name(node.self())])
+
+  let assert Ok(_) = system.start()
+
+  let assert Ok(nodes) =
+    config.change_config_extra_db_nodes([node.name(node.self())])
+
+  assert nodes == [node.name(node.self())]
 }
 
 pub fn api_test() {
