@@ -20,6 +20,8 @@ fn change_config(
   value value: dynamic.Dynamic,
 ) -> Result(Dynamic, Dynamic)
 
+/// <https://www.erlang.org/doc/apps/mnesia/mnesia.html#change_config/2>
+/// 
 pub fn change_config_extra_db_nodes(
   nodes nodes: List(Node),
 ) -> Result(List(Node), Dynamic) {
@@ -42,15 +44,22 @@ pub fn change_config_extra_db_nodes(
   Ok(nodes)
 }
 
-pub fn change_config_dc_dump_limit(limit limit: Float) -> Result(Float, Dynamic) {
+/// <https://www.erlang.org/doc/apps/mnesia/mnesia.html#change_config/2>
+/// 
+pub fn change_config_dc_dump_limit_float(
+  limit limit: Float,
+) -> Result(Float, Dynamic) {
   use limit <- result.try(change_config(DcDumpLimit, dynamic.float(limit)))
 
-  use limit <- result.try(
-    decode.run(limit, decode.float)
-    |> result.map_error(fn(_) {
-      dynamic.string("Failed to decode dc_dump_limit")
-    }),
-  )
+  decode.run(limit, decode.float)
+  |> result.map_error(fn(_) { dynamic.string("Failed to decode dc_dump_limit") })
+}
 
-  Ok(limit)
+/// <https://www.erlang.org/doc/apps/mnesia/mnesia.html#change_config/2>
+/// 
+pub fn change_config_dc_dump_limit_int(limit limit: Int) -> Result(Int, Dynamic) {
+  use limit <- result.try(change_config(DcDumpLimit, dynamic.int(limit)))
+
+  decode.run(limit, decode.int)
+  |> result.map_error(fn(_) { dynamic.string("Failed to decode dc_dump_limit") })
 }
