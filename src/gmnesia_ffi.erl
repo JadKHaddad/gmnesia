@@ -67,6 +67,7 @@ change_table_copy_type(Table, Node, StorageType) ->
             {error, Reason}
     end.
 
+
 create_table(Table, Options) ->
     case mnesia:create_table(Table, Options) of
         {atomic, ok} ->
