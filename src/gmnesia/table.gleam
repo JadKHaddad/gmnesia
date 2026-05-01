@@ -79,3 +79,11 @@ pub fn add_table_copy(
   node node: Node,
   storage_type storage_type: StorageType,
 ) -> Result(Nil, Dynamic)
+
+/// <https://www.erlang.org/doc/apps/mnesia/mnesia.html#change_table_copy_type/3>
+@external(erlang, "gmnesia_ffi", "change_table_copy_type")
+pub fn change_table_copy_type(
+  table table: Table,
+  node node: Node,
+  storage_type storage_type: StorageType,
+) -> Result(Nil, Dynamic)
