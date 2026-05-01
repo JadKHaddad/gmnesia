@@ -160,8 +160,8 @@ set_debug_level(Level) ->
 
 change_config(Key, Value) ->
     case mnesia:change_config(Key, Value) of
-        ok ->
-            {ok, nil};
+        {ok, Ok} ->
+            {ok, Ok};
         {error, Reason} ->
             {error, Reason}
     end.

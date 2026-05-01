@@ -6,6 +6,14 @@ import gmnesia/storage.{type StorageType}
 pub type Table =
   atom.Atom
 
+/// <https://www.erlang.org/doc/apps/mnesia/mnesia.html#table_info/2>
+/// 
+pub type TableInfo {
+  All
+  AccessModule
+  // TODO: More info types
+}
+
 /// <https://www.erlang.org/doc/apps/mnesia/mnesia.html#create_table/2>
 /// 
 pub type Options {
