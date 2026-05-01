@@ -6,6 +6,7 @@ pub type SystemInfo {
   All
   AccessModule
   AutoRepair
+  Tables
   // TODO: More info types
 }
 
