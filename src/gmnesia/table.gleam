@@ -78,4 +78,4 @@ pub fn add_table_copy(
   table table: Table,
   node node: Node,
   storage_type storage_type: StorageType,
-) -> Dynamic
+) -> Result(Nil, Dynamic)
