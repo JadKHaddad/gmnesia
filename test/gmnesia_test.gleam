@@ -135,6 +135,18 @@ pub fn change_config_extra_db_nodes_test() {
   assert nodes == [node.name(node.self())]
 }
 
+pub fn set_master_nodes_test() {
+  debug.set_debug_level(debug.Verbose)
+
+  let assert Ok(_) = system.stop()
+
+  let _ = schema.create_schema(nodes: [node.name(node.self())])
+
+  let assert Ok(_) = system.start()
+
+  let assert Ok(_) = table.set_master_nodes_1([node.name(node.self())])
+}
+
 pub fn api_test() {
   let assert Ok(_) = system.stop()
 

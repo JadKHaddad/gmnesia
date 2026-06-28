@@ -95,3 +95,16 @@ pub fn change_table_copy_type(
   node node: Node,
   storage_type storage_type: StorageType,
 ) -> Result(Nil, Dynamic)
+
+/// <https://www.erlang.org/doc/apps/mnesia/mnesia.html#set_master_nodes/1>
+@external(erlang, "gmnesia_ffi", "set_master_nodes")
+pub fn set_master_nodes_1(
+  master_nodes master_nodes: List(Node),
+) -> Result(Nil, Dynamic)
+
+/// <https://www.erlang.org/doc/apps/mnesia/mnesia.html#set_master_nodes/2>
+@external(erlang, "gmnesia_ffi", "set_master_nodes")
+pub fn set_master_nodes_2(
+  table table: Table,
+  master_nodes master_nodes: List(Node),
+) -> Result(Nil, Dynamic)
