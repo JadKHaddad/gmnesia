@@ -6,6 +6,12 @@ import gmnesia/storage.{type StorageType}
 pub type Table =
   atom.Atom
 
+/// A single user-defined property: {Key, Value}
+/// <https://www.erlang.org/doc/apps/mnesia/mnesia.html#create_table/2>
+///
+pub type UserProperty =
+  #(atom.Atom, Dynamic)
+
 /// <https://www.erlang.org/doc/apps/mnesia/mnesia.html#table_info/2>
 /// 
 pub type TableInfo {
@@ -22,6 +28,7 @@ pub type Options {
   Type(Type)
   DiscCopies(List(Node))
   DiscOnlyCopies(List(Node))
+  UserProperties(List(UserProperty))
 }
 
 /// <https://www.erlang.org/doc/apps/mnesia/mnesia.html#create_table/2>
